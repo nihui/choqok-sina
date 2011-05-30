@@ -1,0 +1,78 @@
+diff --git a/plugins/imagepreview/imagepreview.cpp b/plugins/imagepreview/imagepreview.cpp
+index 33ca749..78b3097 100644
+--- a/plugins/imagepreview/imagepreview.cpp
++++ b/plugins/imagepreview/imagepreview.cpp
+@@ -38,6 +38,8 @@ const QRegExp ImagePreview::mTweetphotoRegExp("(http://tweetphoto.com/[^\\s<>\"]
+ const QRegExp ImagePreview::mPlixiRegExp("(http://plixi.com/[^\\s<>\"]+[^!,\\.\\s<>'\"\\]])");
+ const QRegExp ImagePreview::mImgLyRegExp("(http://img.ly/[^\\s<>\"]+[^!,\\.\\s<>'\"\\]])");
+ const QRegExp ImagePreview::mTwitgooRegExp("(http://(([a-zA-Z0-9]+\\.)?)twitgoo.com/[^\\s<>\"]+[^!,\\.\\s<>'\"\\]])");
++const QRegExp ImagePreview::mTencentRegExp("(http://app.qpic.cn/mblogpic/[^\\s<>\"]+[^!,\\.\\s<>'\"\\]])");
++const QRegExp ImagePreview::mSinaimgRegExp("(http://...\\.sinaimg\\.cn/[^\\s<>\"]+[^!,\\.\\s<>'\"\\]])");
+ 
+ 
+ 
+@@ -92,6 +94,8 @@ void ImagePreview::parse(Choqok::UI::PostWidget* postToParse)
+     QStringList PlixiRedirectList;
+     QStringList ImgLyRedirectList;
+     QStringList TwitgooRedirectList;
++    QStringList tencentList;
++    QStringList sinaimgList;
+     QString content = postToParse->currentPost().content;
+ 
+     //Twitpic: http://www.twitpic.com/api.do
+@@ -110,6 +114,42 @@ void ImagePreview::parse(Choqok::UI::PostWidget* postToParse)
+         Choqok::MediaManager::self()->fetchImage(twitpicUrl, Choqok::MediaManager::Async);
+     }
+ 
++    //Tencent: http://app.qpic.cn
++    pos = 0;
++    while ((pos = mTencentRegExp.indexIn(content, pos)) != -1) {
++        pos += mTencentRegExp.matchedLength();
++        tencentList << mTencentRegExp.cap(0);
++        kDebug()<<mTencentRegExp.capturedTexts();
++    }
++    foreach(const QString &url, tencentList) {
++        QString tencentUrl = url;
++        connect( Choqok::MediaManager::self(),
++                 SIGNAL(imageFetched(QString,QPixmap)),
++                 SLOT(slotImageFetched(QString,QPixmap)) );
++        mParsingList.insert(tencentUrl, postToParse);
++        mBaseUrlMap.insert(tencentUrl, url);
++        Choqok::MediaManager::self()->fetchImage(tencentUrl, Choqok::MediaManager::Async);
++    }
++
++    //Sinaimg: http://sinaimg.cn
++    pos = 0;
++    while ((pos = mSinaimgRegExp.indexIn(content, pos)) != -1) {
++        pos += mSinaimgRegExp.matchedLength();
++        sinaimgList << mSinaimgRegExp.cap(0);
++        kDebug()<<mSinaimgRegExp.capturedTexts();
++    }
++    foreach(const QString &url, sinaimgList) {
++        QString sinaimgUrl = url;
++        sinaimgUrl.replace( "/large/", "/thumbnail/" );
++        sinaimgUrl.replace( "/orignal/", "/thumbnail/" );
++        connect( Choqok::MediaManager::self(),
++                 SIGNAL(imageFetched(QString,QPixmap)),
++                 SLOT(slotImageFetched(QString,QPixmap)) );
++        mParsingList.insert(sinaimgUrl, postToParse);
++        mBaseUrlMap.insert(sinaimgUrl, url);
++        Choqok::MediaManager::self()->fetchImage(sinaimgUrl, Choqok::MediaManager::Async);
++    }
++
+     //YFrog: http://code.google.com/p/imageshackapi/wiki/YFROGurls
+     //       http://code.google.com/p/imageshackapi/wiki/YFROGthumbnails
+     pos = 0;
+diff --git a/plugins/imagepreview/imagepreview.h b/plugins/imagepreview/imagepreview.h
+index 7888633..ca988e9 100644
+--- a/plugins/imagepreview/imagepreview.h
++++ b/plugins/imagepreview/imagepreview.h
+@@ -70,6 +70,8 @@ private:
+     static const QRegExp mPlixiRegExp;
+     static const QRegExp mImgLyRegExp;
+     static const QRegExp mTwitgooRegExp;
++    static const QRegExp mTencentRegExp;
++    static const QRegExp mSinaimgRegExp;
+ };
+ 
+ #endif // IMAGEPREVIEW_H
