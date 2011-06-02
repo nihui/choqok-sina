@@ -234,6 +234,7 @@ void SinaMicroBlog::fetchPost( Choqok::Account* theAccount, Choqok::Post* post )
                                                     QOAuth::HMAC_SHA1, params, QOAuth::ParseForInlineQuery );
     url.setQuery( hs );
     KIO::StoredTransferJob* job = KIO::storedGet( url, KIO::Reload, KIO::HideProgressInfo );
+    job->addMetaData( "content-type", "Content-Type: application/x-www-form-urlencoded" );
     m_fetchPost[ job ] = post;
     m_jobAccount[ job ] = acc;
     connect( job, SIGNAL(result(KJob*)), this, SLOT(slotFetchPost(KJob*)) );
@@ -259,6 +260,7 @@ void SinaMicroBlog::removePost( Choqok::Account* theAccount, Choqok::Post* post 
         QByteArray hs = qoauth->createParametersString( url.url(), QOAuth::POST, acc->oauthToken(), acc->oauthTokenSecret(),
                                                         QOAuth::HMAC_SHA1, params, QOAuth::ParseForRequestContent );
         KIO::StoredTransferJob* job = KIO::storedHttpPost( hs, url, KIO::HideProgressInfo );
+        job->addMetaData( "content-type", "Content-Type: application/x-www-form-urlencoded" );
         m_removePost[ job ] = post;
         m_jobAccount[ job ] = acc;
         connect( job, SIGNAL(result(KJob*)), this, SLOT(slotRemovePost(KJob*)) );
@@ -275,6 +277,7 @@ void SinaMicroBlog::removePost( Choqok::Account* theAccount, Choqok::Post* post 
         QByteArray hs = qoauth->createParametersString( url.url(), QOAuth::POST, acc->oauthToken(), acc->oauthTokenSecret(),
                                                         QOAuth::HMAC_SHA1, params, QOAuth::ParseForRequestContent );
         KIO::StoredTransferJob* job = KIO::storedHttpPost( hs, url, KIO::HideProgressInfo );
+        job->addMetaData( "content-type", "Content-Type: application/x-www-form-urlencoded" );
         m_removePost[ job ] = post;
         m_jobAccount[ job ] = acc;
         connect( job, SIGNAL(result(KJob*)), this, SLOT(slotRemovePost(KJob*)) );
@@ -422,6 +425,7 @@ void SinaMicroBlog::updateTimelines( Choqok::Account* theAccount )
                                                         QOAuth::HMAC_SHA1, params, QOAuth::ParseForInlineQuery );
         url.setQuery( hs );
         KIO::StoredTransferJob* job = KIO::storedGet( url, KIO::Reload, KIO::HideProgressInfo );
+        job->addMetaData( "content-type", "Content-Type: application/x-www-form-urlencoded" );
         m_jobTimeline[job] = timelineName;
         m_jobAccount[job] = acc;
         connect( job, SIGNAL(result(KJob*)), this, SLOT(slotRequestTimeline(KJob*)) );
@@ -470,6 +474,7 @@ void SinaMicroBlog::retweetPost( Choqok::Account* theAccount, Choqok::Post* post
     QByteArray hs = qoauth->createParametersString( url.url(), QOAuth::POST, acc->oauthToken(), acc->oauthTokenSecret(),
                                                     QOAuth::HMAC_SHA1, params, QOAuth::ParseForRequestContent );
     KIO::StoredTransferJob* job = KIO::storedHttpPost( hs, url, KIO::HideProgressInfo );
+    job->addMetaData( "content-type", "Content-Type: application/x-www-form-urlencoded" );
     m_createPost[ job ] = post;
     m_jobAccount[ job ] = acc;
     connect( job, SIGNAL(result(KJob*)), this, SLOT(slotCreatePost(KJob*)) );
@@ -494,6 +499,7 @@ void SinaMicroBlog::createFavorite( Choqok::Account* theAccount, Choqok::Post* p
     QByteArray hs = qoauth->createParametersString( url.url(), QOAuth::POST, acc->oauthToken(), acc->oauthTokenSecret(),
                                                     QOAuth::HMAC_SHA1, params, QOAuth::ParseForRequestContent );
     KIO::StoredTransferJob* job = KIO::storedHttpPost( hs, url, KIO::HideProgressInfo );
+    job->addMetaData( "content-type", "Content-Type: application/x-www-form-urlencoded" );
     m_createFavorite[ job ] = post;
     m_jobAccount[ job ] = acc;
     connect( job, SIGNAL(result(KJob*)), this, SLOT(slotCreateFavorite(KJob*)) );
@@ -518,6 +524,7 @@ void SinaMicroBlog::removeFavorite( Choqok::Account* theAccount, Choqok::Post* p
     QByteArray hs = qoauth->createParametersString( url.url(), QOAuth::POST, acc->oauthToken(), acc->oauthTokenSecret(),
                                                     QOAuth::HMAC_SHA1, params, QOAuth::ParseForRequestContent );
     KIO::StoredTransferJob* job = KIO::storedHttpPost( hs, url, KIO::HideProgressInfo );
+    job->addMetaData( "content-type", "Content-Type: application/x-www-form-urlencoded" );
     m_removeFavorite[ job ] = post;
     m_jobAccount[ job ] = acc;
     connect( job, SIGNAL(result(KJob*)), this, SLOT(slotRemoveFavorite(KJob*)) );
