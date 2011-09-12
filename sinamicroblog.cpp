@@ -3,6 +3,7 @@
 #include "sinaaccount.h"
 #include "sinaeditaccount.h"
 #include "sinapostwidget.h"
+#include "sinatimelinewidget.h"
 
 #include <choqok/accountmanager.h>
 #include <choqok/application.h>
@@ -29,14 +30,14 @@ SinaMicroBlog::SinaMicroBlog( QObject* parent, const QVariantList& args )
     setCharLimit( 140 );
 
     QStringList m_timelineNames;
-    m_timelineNames << "home" << "inbox" << "outbox"/* << "favorite"*/ << "public" << "mentions" << "user";
+    m_timelineNames << "home" << "inbox" << "outbox" << "favorite" << "public" << "mentions" << "user";
     //<< "retweets" << "location";
     setTimelineNames( m_timelineNames );
 
     m_timelineApiPath[ "home" ] = "/statuses/home_timeline.json";
     m_timelineApiPath[ "inbox" ] = "/direct_messages.json";
     m_timelineApiPath[ "outbox" ] = "/direct_messages/sent.json";
-//     m_timelineApiPath[ "favorite" ] = "/favorites.json";
+    m_timelineApiPath[ "favorite" ] = "/favorites.json";
     m_timelineApiPath[ "public" ] = "/statuses/public_timeline.json";
     m_timelineApiPath[ "mentions" ] = "/statuses/mentions.json";
     m_timelineApiPath[ "user" ] = "/statuses/user_timeline.json";
@@ -76,11 +77,11 @@ SinaMicroBlog::SinaMicroBlog( QObject* parent, const QVariantList& args )
     info->icon = "mail-folder-outbox";
     m_timelineInfo[ "outbox" ] = info;
 
-//     info = new Choqok::TimelineInfo;
-//     info->name = i18nc( "Timeline Name", "Favorite" );
-//     info->description = i18nc( "Timeline description", "Your favorites" );
-//     info->icon = "favorites";
-//     m_timelineInfo[ "favorite" ] = info;
+    info = new Choqok::TimelineInfo;
+    info->name = i18nc( "Timeline Name", "Favorite" );
+    info->description = i18nc( "Timeline description", "Your favorites" );
+    info->icon = "favorites";
+    m_timelineInfo[ "favorite" ] = info;
 
     info = new Choqok::TimelineInfo;
     info->name = i18nc( "Timeline Name", "Public" );
@@ -144,6 +145,11 @@ Choqok::UI::PostWidget* SinaMicroBlog::createPostWidget( Choqok::Account* accoun
 {
     SinaAccount* acc = dynamic_cast<SinaAccount*>(account);
     return new SinaPostWidget( acc, post, parent );
+}
+
+Choqok::UI::TimelineWidget* SinaMicroBlog::createTimelineWidget( Choqok::Account* account, const QString& timelineName, QWidget* parent )
+{
+    return new SinaTimelineWidget( account, timelineName, parent );
 }
 
 void SinaMicroBlog::createPost( Choqok::Account* theAccount, Choqok::Post* post )
@@ -414,11 +420,12 @@ void SinaMicroBlog::updateTimelines( Choqok::Account* theAccount )
         QString latestStatusId = m_timelineLatestId[ acc ][ timelineName ];
 
         QOAuth::ParamMap params;
-//         if ( !latestStatusId.isEmpty() ) {
-//             params.insert ( "since_id", latestStatusId.toUtf8() );
+        if ( !latestStatusId.isEmpty() ) {
+            params.insert ( "since_id", latestStatusId.toUtf8() );
 //             countOfPost = 200;
-//         }
+        }
         params.insert( "count", QByteArray::number( countOfPost ) );
+        params.insert( "page", "1" );/// TODO do not hardcode here
 
         QOAuth::Interface* qoauth = acc->qoauthInterface();
         QByteArray hs = qoauth->createParametersString( url.url(), QOAuth::GET, acc->oauthToken(), acc->oauthTokenSecret(),
@@ -469,7 +476,6 @@ void SinaMicroBlog::retweetPost( Choqok::Account* theAccount, Choqok::Post* post
 
     QOAuth::ParamMap params;
     params.insert( "id", post->postId.toUtf8() );
-//     params.insert( "source", "Choqok" );
     QOAuth::Interface* qoauth = acc->qoauthInterface();
     QByteArray hs = qoauth->createParametersString( url.url(), QOAuth::POST, acc->oauthToken(), acc->oauthTokenSecret(),
                                                     QOAuth::HMAC_SHA1, params, QOAuth::ParseForRequestContent );
@@ -837,6 +843,13 @@ void SinaMicroBlog::readPostFromJsonMap( const QVariantMap& varmap, Choqok::Post
     post->replyToUserId = varmap["in_reply_to_user_id"].toString();
     post->replyToUserName = varmap["in_reply_to_screen_name"].toString();
     post->isFavorited = varmap["favorited"].toBool();
+
+    /// append retweet users if exists, patch written by whentp
+    QVariantMap retweeted = varmap["retweeted_status"].toMap();
+    if ( !retweeted.isEmpty() ) {
+        QVariantMap user = retweeted["user"].toMap();
+        post->content.append( "\n" + user["screen_name"].toString() + ":" + retweeted["text"].toString() );
+    }
 
     /// append picture if exists
     QString tp = varmap["original_pic"].toString();

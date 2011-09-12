@@ -92,8 +92,8 @@ void SinaPostWidget::slotFavorite()
 {
     setReadWithSignal();
     SinaMicroBlog* microblog = dynamic_cast<SinaMicroBlog*>(currentAccount()->microblog());
-    Choqok::Post* post = new Choqok::Post;
-    post->postId = currentPost().postId;
+    Choqok::Post* post = const_cast<Choqok::Post*>(&currentPost());/// NOTE use dummy or modeling one? --- nihui
+//     post->postId = currentPost().postId;
     if ( currentPost().isFavorited )
         microblog->removeFavorite( currentAccount(), post );
     else
@@ -105,7 +105,7 @@ void SinaPostWidget::slotFavoriteCreated( Choqok::Account* account, Choqok::Post
     if ( currentAccount() != account || post->postId != currentPost().postId )
         return;
 
-    delete post;
+//     delete post;
     Choqok::Post tmp = currentPost();
     tmp.isFavorited = true;
     setCurrentPost( tmp );
@@ -118,7 +118,7 @@ void SinaPostWidget::slotFavoriteRemoved( Choqok::Account* account, Choqok::Post
     if ( currentAccount() != account || post->postId != currentPost().postId )
         return;
 
-    delete post;
+//     delete post;
     Choqok::Post tmp = currentPost();
     tmp.isFavorited = false;
     setCurrentPost( tmp );

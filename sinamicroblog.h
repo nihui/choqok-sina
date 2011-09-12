@@ -17,6 +17,7 @@ class SinaMicroBlog : public Choqok::MicroBlog
         virtual void aboutToUnload();
         virtual ChoqokEditAccountWidget* createEditAccountWidget( Choqok::Account* account, QWidget* parent );
         virtual Choqok::UI::PostWidget* createPostWidget( Choqok::Account* account, const Choqok::Post& post, QWidget* parent );
+        virtual Choqok::UI::TimelineWidget* createTimelineWidget( Choqok::Account* account, const QString& timelineName, QWidget* parent );
         virtual void createPost( Choqok::Account* theAccount, Choqok::Post* post );
         virtual void abortCreatePost( Choqok::Account* theAccount, Choqok::Post* post = 0 );
         virtual void fetchPost( Choqok::Account* theAccount, Choqok::Post* post );

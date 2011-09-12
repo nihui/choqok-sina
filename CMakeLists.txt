@@ -25,6 +25,7 @@ set(choqok_sina_SRCS
     sinaeditaccount.cpp
     sinamicroblog.cpp
     sinapostwidget.cpp
+    sinatimelinewidget.cpp
 )
 
 kde4_add_plugin(choqok_sina ${choqok_sina_SRCS})
