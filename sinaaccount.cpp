@@ -3,6 +3,7 @@
 #include "sinamicroblog.h"
 
 #include <choqok/passwordmanager.h>
+#include <KIO/AccessManager>
 #include <QtOAuth/QtOAuth>
 
 static const char sinaConsumerKey[] = "3958149448";
@@ -16,7 +17,7 @@ SinaAccount::SinaAccount( SinaMicroBlog* parent, const QString& alias )
     m_timelineNames = configGroup()->readEntry( QString( "%1_Timelines" ).arg( alias ), QStringList() );
 
     /// TODO KDE 4.5 Change to use new class
-    qoauth = new QOAuth::Interface;//( new KIO::AccessManager( this ), this );
+    qoauth = new QOAuth::Interface( new KIO::AccessManager( this ), this );
     qoauth->setConsumerKey( SinaAccount::oauthConsumerKey() );
     qoauth->setConsumerSecret( SinaAccount::oauthConsumerSecret() );
     qoauth->setRequestTimeout( 10000 );
