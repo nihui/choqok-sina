@@ -79,13 +79,13 @@ void SinaPostWidget::slotReply()
 
 void SinaPostWidget::slotWrite()
 {
-    emit reply( QString("@%1").arg( currentPost().author.userName ), QString() );
+    emit reply( QString("@%1").arg( currentPost().author.userName ), QString(), currentPost().author.userName );
 }
 
 void SinaPostWidget::slotReplyAll()
 {
     QString txt = QString("@%1").arg( currentPost().author.userName );
-    emit reply( txt, currentPost().postId );
+    emit reply( txt, currentPost().postId, currentPost().author.userName );
 }
 
 void SinaPostWidget::slotFavorite()
