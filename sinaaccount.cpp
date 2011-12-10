@@ -16,7 +16,6 @@ SinaAccount::SinaAccount( SinaMicroBlog* parent, const QString& alias )
     m_oauthTokenSecret = Choqok::PasswordManager::self()->readPassword( QString( "%1_OAuthTokenSecret" ).arg( alias ) ).toUtf8();
     m_timelineNames = configGroup()->readEntry( QString( "%1_Timelines" ).arg( alias ), QStringList() );
 
-    /// TODO KDE 4.5 Change to use new class
     qoauth = new QOAuth::Interface( new KIO::AccessManager( this ), this );
     qoauth->setConsumerKey( SinaAccount::oauthConsumerKey() );
     qoauth->setConsumerSecret( SinaAccount::oauthConsumerSecret() );
