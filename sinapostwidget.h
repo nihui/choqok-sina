@@ -33,6 +33,7 @@ class SinaPostWidget : public Choqok::UI::PostWidget
         virtual ~SinaPostWidget();
         virtual void initUi();
     protected Q_SLOTS:
+        virtual QString prepareStatus( const QString &text );
         virtual void slotResendPost();
     private Q_SLOTS:
         void slotReply();

@@ -29,6 +29,10 @@
 #include <KLocale>
 #include <KMenu>
 #include <KPushButton>
+#include <QRegExp>
+
+static const QRegExp UserRegExp("@([^\\s\\W]+)", Qt::CaseInsensitive);
+static const QRegExp TagRegExp("#([^#]+)#", Qt::CaseInsensitive);
 
 static const KIcon unFavIcon( Choqok::MediaManager::convertToGrayScale( KIcon( "rating" ).pixmap( 16 ) ) );
 
@@ -83,6 +87,14 @@ void SinaPostWidget::initUi()
             favoriteButton->setIcon( unFavIcon );
         }
     }
+}
+
+QString SinaPostWidget::prepareStatus(const QString& text)
+{
+    QString res = Choqok::UI::PostWidget::prepareStatus(text);
+    res.replace(UserRegExp,"@<a href='user://\\1'>\\1</a>");
+    res.replace(TagRegExp,"#<a href='tag://\\1'>\\1</a>");
+    return res;
 }
 
 void SinaPostWidget::slotResendPost()
